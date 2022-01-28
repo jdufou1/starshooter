@@ -3,7 +3,7 @@ import numpy as np
 from pygame.locals import *
 from model.Model import Model
 from view.View import View
-
+from Controls import Controls
 
 """
 TODO : remplacer tout le code en architecture MVC
@@ -16,6 +16,9 @@ model = Model()
 view = View(model)
 view.start()
 model.start()
+
+controls = Controls(model,view)
+controls.start()
 
 
 

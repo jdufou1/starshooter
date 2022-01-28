@@ -20,12 +20,11 @@ class View :
         pygame.display.init()
         self.main_frame = pygame.display.set_mode((View.width,View.height)) # Création de la fenêtre principale
         self.ship_frame = pygame.image.load("./img/ship.png").convert() # Chargement de l'image du vaisseau du joueur
-        self.meteor_frame = pygame.image.load("./img/meteor.png").convert() # Chargement de l'image d'un meteor
-        self.meteor_rect = self.meteor_frame.get_rect()
         width_ship = View.width * model.getShip().get_relative_width(self.model.getWidth())
         height_ship = View.height * model.getShip().get_relative_height(self.model.getHeight())
         self.ship_frame = pygame.transform.scale(self.ship_frame, (width_ship,height_ship)) # Redimensionnement de l'image du vaisseau
         self.thread = ViewThread(self)
+        self.current_meteor_frames = []
 
     def update(self) -> None :
         """
@@ -40,17 +39,28 @@ class View :
         """
         x_ship = View.width * self.model.getShip().get_relative_X(self.model.getWidth())
         y_ship = View.height * self.model.getShip().get_relative_Y(self.model.getHeight())
-        self.main_frame.blit(self.ship_frame, (x_ship , y_ship)) 
+        rect = self.ship_frame.get_rect()
+        rect = rect.move(x_ship , y_ship)
+        self.main_frame.blit(self.ship_frame, rect)
     
-    """A optimiser ! """
     def update_meteors(self) -> None:
+        # On supprime les anciennes sprites de meteors
+        while len(self.current_meteor_frames) > 0 :
+            image,(x,y) = self.current_meteor_frames.pop()
+            transparent = (0,0,0,0)
+            image.fill(transparent)
+            self.main_frame.blit(image, (x , y))
+        # On ajoute les nouvelles images de meteors
         for meteor in self.model.getMeteors():
             height_meteor = View.height * meteor.get_relative_height(self.model.getHeight())
             width_meteor = View.width * meteor.get_relative_width(self.model.getWidth())
-            self.meteor_frame = pygame.transform.scale(self.meteor_frame, (width_meteor,height_meteor))
+            meteor_frame = pygame.image.load("./img/meteor.png").convert()
+            meteor_frame = pygame.transform.scale(meteor_frame, (width_meteor,height_meteor))
             x_meteor = View.width * meteor.get_relative_X(self.model.getWidth())
             y_meteor = View.height * meteor.get_relative_Y(self.model.getHeight())
-            self.main_frame.blit(self.meteor_frame, (x_meteor , y_meteor))
+            self.main_frame.blit(meteor_frame, (x_meteor , y_meteor))
+            self.current_meteor_frames.append((meteor_frame, (x_meteor , y_meteor)))
+
 
     def update_component(self) -> None :
         """
@@ -75,7 +85,7 @@ class ViewThread(threading.Thread) :
     """
     Classe qui s'occupe de mettre à jour l'affichage du jeu
     """
-    speed_view = 0.01 # Mise à jour de l'écran toutes les 0.01 secondes
+    speed_view = 0.005 # Mise à jour de l'écran toutes les 0.01 secondes
     condition = True
 
     def __init__(self,view) -> None:

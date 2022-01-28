@@ -27,6 +27,9 @@ class Model:
     def getMeteors(self) : 
         return self.meteors
 
+    def getShip(self) : 
+        return self.ship
+
     def createMeteor(self) -> None :
         self.meteors.append(Meteor(np.random.randint(0,self.width - Meteor.width),0))
 
@@ -40,6 +43,11 @@ class Model:
             self.createMeteor()
 
     def updateMeteors(self) -> None :
+        # Génération aléatoire de meteors
+        alea = np.random.randint(400)
+        if alea < 5 and len(self.meteors) < 4 :
+            self.createMeteor()
+        # Application de la gravite sur les meteors
         for meteor in self.meteors :
             meteor.fall()
 

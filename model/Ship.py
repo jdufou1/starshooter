@@ -7,13 +7,17 @@ class Ship :
         self.x = x
         self.y = y
 
-
-
     def getX(self) -> int :
         return self.x
 
     def getY(self) -> int :
         return self.y
+
+    def move_right(self,step) -> None :
+        self.x += step
+        
+    def move_left(self,step) -> None :
+        self.x += step
 
     def get_relative_Y(self,max_height) -> float:
         """
