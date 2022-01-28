@@ -7,6 +7,8 @@ class Ship :
         self.x = x
         self.y = y
 
+
+
     def getX(self) -> int :
         return self.x
 
