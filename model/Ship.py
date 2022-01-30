@@ -2,6 +2,7 @@ class Ship :
     """Cette classe permet la creation du vaisseau (ship)"""
     height = 100 # taille 
     width = 100 # largeur 
+    step = 5
 
     def __init__(self,x,y) -> None:
         self.x = x
@@ -13,11 +14,11 @@ class Ship :
     def getY(self) -> int :
         return self.y
 
-    def move_right(self,step) -> None :
-        self.x += step
+    def move_right(self) -> None :
+        self.x += Ship.step
         
-    def move_left(self,step) -> None :
-        self.x += step
+    def move_left(self) -> None :
+        self.x -= Ship.step
 
     def get_relative_Y(self,max_height) -> float:
         """

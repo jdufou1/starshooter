@@ -57,6 +57,12 @@ class Model:
         """
         self.thread.start()
 
+    def stop(self) -> None :
+        """
+        Stop le thread de mise à jour du modele
+        """
+        self.thread.setCondition(False)
+
     def getShip(self) -> None :
         """
         Retourne le vaisseau
@@ -80,6 +86,14 @@ class Model:
         Retourne les meteors
         """ 
         return self.meteors
+
+    def move_right_ship(self) -> None :
+        if self.ship.getX() + Ship.width  + Ship.step < Model.width :
+            self.ship.move_right()
+    
+    def move_left_ship(self) -> None :
+        if self.ship.getX() - Ship.step > 0 : 
+            self.ship.move_left()
 
 class ModelThread(threading.Thread) :
 

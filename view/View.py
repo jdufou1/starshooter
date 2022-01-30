@@ -19,10 +19,12 @@ class View :
         self.model = model
         pygame.display.init()
         self.main_frame = pygame.display.set_mode((View.width,View.height)) # Création de la fenêtre principale
-        self.ship_frame = pygame.image.load("./img/ship.png").convert() # Chargement de l'image du vaisseau du joueur
+        x_ship = View.width * self.model.getShip().get_relative_X(self.model.getWidth())
+        y_ship = View.height * self.model.getShip().get_relative_Y(self.model.getHeight())
+        image = pygame.image.load("./img/ship.png").convert() # Chargement de l'image du vaisseau du joueur
         width_ship = View.width * model.getShip().get_relative_width(self.model.getWidth())
         height_ship = View.height * model.getShip().get_relative_height(self.model.getHeight())
-        self.ship_frame = pygame.transform.scale(self.ship_frame, (width_ship,height_ship)) # Redimensionnement de l'image du vaisseau
+        self.current_ship_frame = pygame.transform.scale(image, (width_ship,height_ship)),(x_ship,y_ship) # Redimensionnement de l'image du vaisseau
         self.thread = ViewThread(self)
         self.current_meteor_frames = []
 
@@ -37,13 +39,23 @@ class View :
         """
         Met à jour la position du vaisseau dans la fenetre en fonction des valeurs du modele
         """
+        image,(x,y) = self.current_ship_frame
+        transparent = (0,0,0,0)
+        image.fill(transparent)
+        self.main_frame.blit(image, (x , y))
+
+        frame = pygame.image.load("./img/ship.png").convert()
+        width_ship = View.width * self.model.getShip().get_relative_width(self.model.getWidth())
+        height_ship = View.height * self.model.getShip().get_relative_height(self.model.getHeight())
         x_ship = View.width * self.model.getShip().get_relative_X(self.model.getWidth())
         y_ship = View.height * self.model.getShip().get_relative_Y(self.model.getHeight())
-        rect = self.ship_frame.get_rect()
-        rect = rect.move(x_ship , y_ship)
-        self.main_frame.blit(self.ship_frame, rect)
+        self.current_ship_frame = pygame.transform.scale(frame, (width_ship,height_ship)),(x_ship,y_ship) # Redimensionnement de l'image du vaisseau
+        self.main_frame.blit(self.current_ship_frame[0],self.current_ship_frame[1])
     
     def update_meteors(self) -> None:
+        """
+        Met à jour la position des meteors dans la fenetre en fonction des valeurs du modele
+        """
         # On supprime les anciennes sprites de meteors
         while len(self.current_meteor_frames) > 0 :
             image,(x,y) = self.current_meteor_frames.pop()
@@ -102,3 +114,6 @@ class ViewThread(threading.Thread) :
         Met à jour la condition d'actualisation de l'affichage
         """
         self.condition = condition
+
+    def getCondition(self) -> bool: 
+        return self.condition
