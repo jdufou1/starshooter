@@ -46,12 +46,11 @@ class ThreadControls(threading.Thread):
     def run(self) -> None :
         while(ThreadControls.condition) :
 
-
             if self.right : 
                 self.controls.getModel().move_right_ship()
             if self.left :
                 self.controls.getModel().move_left_ship()
-
+                
 
             # verification de l'activation des controles : 
             for event in pygame.event.get() :
@@ -69,23 +68,17 @@ class ThreadControls(threading.Thread):
                         self.right = True
                     if event.key == pygame.K_LEFT:
                         self.left = True
+                    if event.key == pygame.K_SPACE:
+                        x_bullet = self.controls.getModel().getShip().getX() + int((self.controls.getModel().getShip().getWidth() / 2))
+                        y_bullet = self.controls.getModel().getShip().getY() - self.controls.getModel().getShip().getHeight()
+                        self.controls.getModel().createBullet(x_bullet,y_bullet)
 
                 if event.type == pygame.KEYUP:
                     if event.key == pygame.K_RIGHT:
                         self.right = False
                     if event.key == pygame.K_LEFT:
                         self.left = False
-                        
-                    
             time.sleep(ThreadControls.speed_controls)
-            """
-            for event in pygame.event.get() :
-                if event.type == K_RIGHT:
-			        self.controls.getModel.getShip().move_right(5)
-                if event.type == K_LEFT:
-			        self.controls.getModel.getShip().move_left(5)
-            time.sleep(ThreadControls.speed_controls)
-            """
 
 
 

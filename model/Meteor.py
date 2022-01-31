@@ -3,7 +3,7 @@ class Meteor:
     width = 50
     height = 50
 
-    fall_value = 5
+    fall_value = 10
     max_pv = 100
 
     def __init__(self,x,y) -> None:
@@ -61,3 +61,8 @@ class Meteor:
         Retourne la largeur relative du vaisseau par rapport à la hauteur du modèle
         """
         return Meteor.width / max_width
+
+    def isInside(self,x,y) -> bool : 
+        if x > self.x and x < self.x + Meteor.width and y < self.y and y > self.y - Meteor.height:
+            return True
+        return False

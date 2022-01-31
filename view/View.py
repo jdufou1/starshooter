@@ -12,8 +12,8 @@ class View :
     """
     Classe qui s'occupe de l'affichage du jeu
     """
-    width = 1000
-    height = 1000
+    width = 800
+    height = 800
 
     def __init__(self,model) -> None:
         self.model = model
@@ -27,6 +27,15 @@ class View :
         self.current_ship_frame = pygame.transform.scale(image, (width_ship,height_ship)),(x_ship,y_ship) # Redimensionnement de l'image du vaisseau
         self.thread = ViewThread(self)
         self.current_meteor_frames = []
+        self.current_bullets_frames = []
+        """
+        pygame.font.init()
+        font = pygame.font.Font('freesansbold.ttf', 32)
+        text = "Vous avez detruit "+str(self.model.getNbDestroy()) + " meteores"
+        self.text_field = font.render(text, True, (255, 255, 255))
+        textRect = self.text_field.get_rect()
+        self.main_frame.blit(self.text_field, textRect)
+        """
 
     def update(self) -> None :
         """
@@ -74,12 +83,47 @@ class View :
             self.current_meteor_frames.append((meteor_frame, (x_meteor , y_meteor)))
 
 
+    def update_bullets(self) -> None :
+        """
+        Met à jour la position des balles dans la fenetre en fonction des valeurs du modele
+        """
+        # On supprime les anciennes sprites de meteors
+        while len(self.current_bullets_frames) > 0 :
+            image,(x,y) = self.current_bullets_frames.pop()
+            transparent = (0,0,0,0)
+            image.fill(transparent)
+            self.main_frame.blit(image, (x , y))
+        # On ajoute les nouvelles images de meteors
+        for bullet in self.model.getBullets():
+            height_bullet = View.height * bullet.get_relative_height(self.model.getHeight())
+            width_bullet = View.width * bullet.get_relative_width(self.model.getWidth())
+            bullet_frame = pygame.image.load("./img/meteor.png").convert()
+            bullet_frame = pygame.transform.scale(bullet_frame, (width_bullet,height_bullet))
+            x_bullet = View.width * bullet.get_relative_X(self.model.getWidth())
+            y_bullet = View.height * bullet.get_relative_Y(self.model.getHeight())
+            self.main_frame.blit(bullet_frame, (x_bullet , y_bullet))
+            self.current_bullets_frames.append((bullet_frame, (x_bullet , y_bullet)))
+
+    def updateHUD(self) -> None :
+        transparent = (0,0,0,0)
+        self.text_field.fill(transparent)
+        self.main_frame.blit(self.text_field, (0 , 0))
+
+        font = pygame.font.Font('freesansbold.ttf', 32)
+        text = "Vous avez detruit "+str(self.model.getNbDestroy()) + " meteores"
+        self.text_field = font.render(text, True, (255, 255, 255))
+        textRect = self.text_field.get_rect()
+        self.main_frame.blit(self.text_field, textRect)
+
+
     def update_component(self) -> None :
         """
         Met à jour tout les composants de l'affichage du jeu
         """
         self.update_ship()
         self.update_meteors()
+        self.update_bullets()
+        #self.updateHUD()
 
     def start(self) -> None :
         """
@@ -97,7 +141,7 @@ class ViewThread(threading.Thread) :
     """
     Classe qui s'occupe de mettre à jour l'affichage du jeu
     """
-    speed_view = 0.005 # Mise à jour de l'écran toutes les 0.01 secondes
+    speed_view = 0.01 # Mise à jour de l'écran toutes les 0.01 secondes
     condition = True
 
     def __init__(self,view) -> None:

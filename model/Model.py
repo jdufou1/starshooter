@@ -4,6 +4,7 @@ from xml.dom.expatbuilder import Namespaces
 
 from model.Ship import Ship
 from model.Meteor import Meteor
+from model.Bullet import Bullet
 import numpy as np
 import threading
 import time
@@ -20,6 +21,8 @@ class Model:
         self.meteors = []
         self.createMeteor()
         self.thread = ModelThread(self)
+        self.bullets = []
+        self.nbDestroy = 0
 
     def __str__(self) -> str:
         pass
@@ -34,11 +37,25 @@ class Model:
         self.meteors.append(Meteor(np.random.randint(0,self.width - Meteor.width),0))
 
     def checkMeteor(self) -> None :
-        self.meteors = [meteor for meteor in self.meteors if meteor.getY() < Model.height and meteor.isAlive()]
-    
+        # self.meteors = [meteor for meteor in self.meteors if meteor.getY() < Model.height and meteor.isAlive()]
+        meteors = []
+        for meteor in self.meteors :
+            contact = False
+            for bullet in self.bullets :
+                if meteor.isInside(bullet.getX(),bullet.getY()):
+                    contact = True
+            if not contact and meteor.getY() < Model.height and meteor.isAlive() :
+                meteors.append(meteor)
+            elif contact:
+                self.nbDestroy += 1
+
+        self.meteors = meteors
+
     def update(self) -> None :
         self.updateMeteors()
+        self.updateBullets()
         self.checkMeteor()
+        self.checkBullets()
         if len(self.meteors) < 1 :
             self.createMeteor()
 
@@ -50,6 +67,25 @@ class Model:
         # Application de la gravite sur les meteors
         for meteor in self.meteors :
             meteor.fall()
+
+    def createBullet(self,x,y) -> None:
+        """
+        Creer une balle dans le modele
+        """
+        self.bullets.append(Bullet(x,y))
+
+    def checkBullets(self) -> None :
+        """
+        Trie des balles qui sont toujours dans le monde
+        """
+        self.bullets = [bullet for bullet in self.bullets if bullet.getY() > 0]
+
+    def updateBullets(self) -> None :
+        """
+        Mise à jour des balles tirés par le joueur
+        """
+        for bullet in self.bullets :
+            bullet.update()
 
     def start(self) -> None :
         """
@@ -87,6 +123,18 @@ class Model:
         """ 
         return self.meteors
 
+    def getBullets(self) :
+        """
+        Retourne les balles
+        """
+        return self.bullets
+
+    def getNbDestroy(self) -> int :
+        """
+        Retourne le nombre de meteore detruit par le joueur
+        """ 
+        return self.nbDestroy
+
     def move_right_ship(self) -> None :
         if self.ship.getX() + Ship.width  + Ship.step < Model.width :
             self.ship.move_right()
@@ -97,7 +145,7 @@ class Model:
 
 class ModelThread(threading.Thread) :
 
-    speed_model = 0.01
+    speed_model = 0.05
     condition = 1
 
     def __init__(self,model):
